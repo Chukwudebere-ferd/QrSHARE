@@ -60,8 +60,10 @@ app.get("/files", (req, res) => {
   fs.readdir(currentPath, { withFileTypes: true }, (err, entries) => {
     if (err) {
       console.error(`Error reading directory ${currentPath}:`, err);
+      // If it's a permission error, we still want to return the current path so the UI can stay there
       return res.status(500).json({
-        error: `Access Denied or Invalid Path: ${err.message}`,
+        error:
+          err.code === "EPERM" ? "Permission Denied" : `Error: ${err.message}`,
         path: currentPath,
         parentPath: path.dirname(currentPath),
       });
@@ -70,11 +72,13 @@ app.get("/files", (req, res) => {
     const fileInfos = entries
       .map((entry) => {
         // Skip some hidden system files that might cause issues or clutter
-        if (
-          entry.name === "$RECYCLE.BIN" ||
-          entry.name === "System Volume Information"
-        )
-          return null;
+        const hidden = [
+          "$RECYCLE.BIN",
+          "System Volume Information",
+          "Config.Msi",
+          "msi",
+        ];
+        if (hidden.includes(entry.name)) return null;
         if (entry.name.startsWith(".") && entry.name !== ".") return null;
 
         const fullPath = path.join(currentPath, entry.name);
@@ -82,6 +86,7 @@ app.get("/files", (req, res) => {
 
         // Basic extension check for previews
         const ext = path.extname(entry.name).toLowerCase();
+        // Expanded media extensions
         const isImage = [
           ".jpg",
           ".jpeg",
@@ -89,8 +94,20 @@ app.get("/files", (req, res) => {
           ".gif",
           ".webp",
           ".svg",
+          ".bmp",
+          ".ico",
+          ".heic",
         ].includes(ext);
-        const isVideo = [".mp4", ".webm", ".ogg", ".mov"].includes(ext);
+        const isVideo = [
+          ".mp4",
+          ".webm",
+          ".ogg",
+          ".mov",
+          ".m4v",
+          ".mkv",
+          ".avi",
+          ".flv",
+        ].includes(ext);
 
         return {
           name: entry.name,
@@ -102,7 +119,7 @@ app.get("/files", (req, res) => {
       })
       .filter((item) => item !== null);
 
-    // Strict Sort: Folders first, then Files, both A-Z (case-insensitive)
+    // Strict Case-Insensitive Sort: Folders first, then Files
     fileInfos.sort((a, b) => {
       if (a.type !== b.type) {
         return a.type === "directory" ? -1 : 1;

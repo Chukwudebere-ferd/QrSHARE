@@ -6,6 +6,7 @@ const browseBtn = document.getElementById("browseBtn");
 const dropZone = document.getElementById("dropZone");
 const refreshBtn = document.getElementById("refreshBtn");
 const downloadList = document.getElementById("downloadList");
+const currentPathText = document.getElementById("currentPathText");
 const tabBtns = document.querySelectorAll(".tab-btn");
 const tabContents = document.querySelectorAll(".tab-content");
 
@@ -202,6 +203,7 @@ async function fetchFiles(path = "") {
     }
     const data = await response.json();
     currentPath = data.path;
+    if (currentPathText) currentPathText.textContent = currentPath;
 
     const files = data.entries;
     downloadList.innerHTML = "";
