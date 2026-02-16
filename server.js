@@ -48,11 +48,22 @@ app.listen(port, () => {
   const url = `http://${localIp}:${port}`;
 
   console.log(`Server running at ${url}`);
-  console.log(`Files will be saved to: ${uploadDir}`);
-
   // Generate QR Code in terminal
-  QRCode.toString(url, { type: "terminal" }, function (err, url) {
+  QRCode.toString(url, { type: "terminal" }, function (err, qrOutput) {
     if (err) console.log(err);
-    console.log(url);
+    console.log(qrOutput);
+    console.log("\nPress Ctrl+C to stop the server.");
   });
 });
+
+// Error handling to prevent crash
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught Exception:", err);
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
+});
+
+// Keep process alive
+process.stdin.resume();
