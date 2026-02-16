@@ -44,7 +44,43 @@ app.post("/upload", upload.array("files"), (req, res) => {
 
 // Start server
 app.listen(port, () => {
-  const localIp = ip.address();
+  // Better IP detection
+  const interfaces = os.networkInterfaces();
+  let localIp = "localhost";
+
+  // Priority: 192.168.x.x (typical home), 10.x.x.x (private), 172.16-31.x.x (private)
+  // Avoid: 127.0.0.1 (loopback), 192.168.56.x (VirtualBox)
+
+  const results = [];
+
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      // Skip internal and non-IPv4
+      if (iface.family === "IPv4" && !iface.internal) {
+        if (!iface.address.startsWith("192.168.56.")) {
+          // Explicitly ignore VirtualBox default
+          results.push(iface.address);
+        }
+      }
+    }
+  }
+
+  // Prioritize 192.168.1.x and 192.168.0.x as they are common home Wi-Fi subnets
+  results.sort((a, b) => {
+    const aIsCommon = a.startsWith("192.168.1.") || a.startsWith("192.168.0.");
+    const bIsCommon = b.startsWith("192.168.1.") || b.startsWith("192.168.0.");
+    if (aIsCommon && !bIsCommon) return -1;
+    if (!aIsCommon && bIsCommon) return 1;
+    return 0;
+  });
+
+  // Pick the first valid result, or fallback to the first non-internal one found by ip package
+  if (results.length > 0) {
+    localIp = results[0];
+  } else {
+    localIp = ip.address(); // Fallback
+  }
+
   const url = `http://${localIp}:${port}`;
 
   console.log(`Server running at ${url}`);
@@ -58,6 +94,13 @@ app.listen(port, () => {
       console.log("\nPress Ctrl+C to stop the server.");
     },
   );
+
+  if (results.length > 1) {
+    console.log("\nOther possible URLs (try these if the above one fails):");
+    results.forEach((addr) => {
+      if (addr !== localIp) console.log(`http://${addr}:${port}`);
+    });
+  }
 });
 
 // Error handling to prevent crash
