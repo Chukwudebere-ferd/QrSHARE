@@ -184,3 +184,14 @@ v1.3.0 (Remote File Browsing) - 2026-02-16
 - Full directory navigation from phone
 - Browse any folder on PC
 - Download arbitrary files
+
+v1.4.0 (Text Sharing) - 2026-02-16
+- Bi-directional text sharing (Phone <-> PC)
+- Copy to clipboard functionality
+- Dedicated "Text Share" tab
+
+v1.5.0 (File Browser Refinement) - 2026-02-16
+- Image/Video previews in file list
+- Robust sorting (Folders first, then A-Z)
+- Improved navigation with "Go Up" breadcrumbs
+- Enhanced folder visibility and permission handling

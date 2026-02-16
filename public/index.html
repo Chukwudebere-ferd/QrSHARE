@@ -19,16 +19,25 @@
 
     <main class="main-content">
       <div class="tabs">
-        <button class="tab-btn active" data-tab="send">Send Files</button>
-        <button class="tab-btn" data-tab="receive">Receive Files</button>
+        <button class="tab-btn active" data-tab="send">
+          <i class="fas fa-upload"></i> Upload
+        </button>
+        <button class="tab-btn" data-tab="receive">
+          <i class="fas fa-search"></i> Browser
+        </button>
+        <button class="tab-btn" data-tab="text">
+          <i class="fas fa-comment-alt"></i> Text
+        </button>
       </div>
 
       <div id="send-tab" class="tab-content active">
         <div class="hero-icon">
-          <i class="fas fa-qrcode"></i>
+          <i class="fas fa-cloud-upload-alt"></i>
         </div>
-        <h1>QR File Drop</h1>
-        <p class="subtitle">Upload files directly to local machine</p>
+        <h1>Upload (Send)</h1>
+        <p class="subtitle">
+          Upload files here to make them available to other devices
+        </p>
 
         <div class="drop-zone" id="dropZone">
           <input type="file" id="fileInput" multiple />
@@ -66,24 +75,65 @@
       </div>
 
       <div id="receive-tab" class="tab-content">
-        <div class="hero-icon">
-          <i class="fas fa-download"></i>
-        </div>
-        <h1>PC Files</h1>
-        <p class="subtitle">Download files from your computer</p>
-
-        <button
-          class="btn btn-secondary"
-          id="refreshBtn"
-          style="margin-bottom: 20px"
+        <div
+          class="hero-icon"
+          style="background: rgba(0, 122, 255, 0.1); color: var(--accent-color)"
         >
-          <i class="fas fa-sync-alt"></i> Refresh List
-        </button>
+          <i class="fas fa-search-location"></i>
+        </div>
+        <h1>Browse (Receive)</h1>
+        <p class="subtitle">Pick a folder to browse and files to download</p>
+
+        <div class="path-breadcrumb" id="pathDisplay">
+          <i class="fas fa-laptop"></i>
+          <span id="currentPathText">Loading path...</span>
+        </div>
+
+        <div class="file-list-header">
+          <span>Folders & Files</span>
+          <button class="copy-icon-btn" id="refreshBtn" title="Refresh List">
+            <i class="fas fa-sync-alt"></i>
+          </button>
+        </div>
 
         <div class="file-list" id="downloadList">
           <!-- Download items will be injected here -->
           <div style="text-align: center; color: #888; padding: 20px">
             Loading files...
+          </div>
+        </div>
+      </div>
+
+      <div id="text-tab" class="tab-content">
+        <div class="hero-icon">
+          <i class="fas fa-comment-alt"></i>
+        </div>
+        <h1>Text Share</h1>
+        <p class="subtitle">Quickly share text or URLs between PC and Phone</p>
+
+        <div class="text-share-container">
+          <textarea
+            id="textInput"
+            placeholder="Type or paste text to share..."
+          ></textarea>
+          <button class="btn btn-primary" id="sendTextBtn">
+            <i class="fas fa-paper-plane"></i> Send to PC
+          </button>
+        </div>
+
+        <div class="shared-text-display">
+          <div class="file-list-header">
+            <span>Shared Content</span>
+            <button
+              id="copyBtn"
+              class="copy-icon-btn"
+              title="Copy to clipboard"
+            >
+              <i class="fas fa-copy"></i>
+            </button>
+          </div>
+          <div id="sharedTextContent" class="text-content-area">
+            No text shared yet.
           </div>
         </div>
       </div>

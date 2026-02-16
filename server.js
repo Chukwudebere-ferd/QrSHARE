@@ -52,35 +52,69 @@ app.post("/upload", upload.array("files"), (req, res) => {
 
 // List files endpoint (with directory navigation)
 app.get("/files", (req, res) => {
-  const currentPath = req.query.path || os.homedir();
+  let currentPath = req.query.path || os.homedir();
+
+  // Resolve path to absolute
+  currentPath = path.resolve(currentPath);
 
   fs.readdir(currentPath, { withFileTypes: true }, (err, entries) => {
     if (err) {
-      return res
-        .status(500)
-        .json({ error: `Unable to scan directory: ${err.message}` });
+      console.error(`Error reading directory ${currentPath}:`, err);
+      return res.status(500).json({
+        error: `Access Denied or Invalid Path: ${err.message}`,
+        path: currentPath,
+        parentPath: path.dirname(currentPath),
+      });
     }
 
     const fileInfos = entries
       .map((entry) => {
-        // Skip hidden files/folders
-        if (entry.name.startsWith(".")) return null;
+        // Skip some hidden system files that might cause issues or clutter
+        if (
+          entry.name === "$RECYCLE.BIN" ||
+          entry.name === "System Volume Information"
+        )
+          return null;
+        if (entry.name.startsWith(".") && entry.name !== ".") return null;
+
+        const fullPath = path.join(currentPath, entry.name);
+        const isDir = entry.isDirectory();
+
+        // Basic extension check for previews
+        const ext = path.extname(entry.name).toLowerCase();
+        const isImage = [
+          ".jpg",
+          ".jpeg",
+          ".png",
+          ".gif",
+          ".webp",
+          ".svg",
+        ].includes(ext);
+        const isVideo = [".mp4", ".webm", ".ogg", ".mov"].includes(ext);
 
         return {
           name: entry.name,
-          type: entry.isDirectory() ? "directory" : "file",
-          path: path.join(currentPath, entry.name),
+          type: isDir ? "directory" : "file",
+          path: fullPath,
+          isPreviewable: !isDir && (isImage || isVideo),
+          mediaType: isImage ? "image" : isVideo ? "video" : null,
         };
       })
       .filter((item) => item !== null);
 
-    // Sort: folders first, then files
+    // Strict Sort: Folders first, then Files, both A-Z (case-insensitive)
     fileInfos.sort((a, b) => {
-      if (a.type === b.type) return a.name.localeCompare(b.name);
-      return a.type === "directory" ? -1 : 1;
+      if (a.type !== b.type) {
+        return a.type === "directory" ? -1 : 1;
+      }
+      return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
     });
 
-    res.json({ path: currentPath, entries: fileInfos });
+    res.json({
+      path: currentPath,
+      entries: fileInfos,
+      parentPath: path.dirname(currentPath),
+    });
   });
 });
 
@@ -102,9 +136,6 @@ app.get("/download", (req, res) => {
   });
 });
 
-    });
-});
-
 // Get shared text endpoint
 app.get("/text", (req, res) => {
   res.json({ text: sharedText });
@@ -115,7 +146,10 @@ app.post("/text", (req, res) => {
   const { text } = req.body;
   if (typeof text === "string") {
     sharedText = text;
-    console.log("Updated shared text:", sharedText.substring(0, 50) + (sharedText.length > 50 ? "..." : ""));
+    console.log(
+      "Updated shared text:",
+      sharedText.substring(0, 50) + (sharedText.length > 50 ? "..." : ""),
+    );
     res.json({ success: true, text: sharedText });
   } else {
     res.status(400).json({ error: "Invalid text provided." });
@@ -163,7 +197,7 @@ app.listen(port, () => {
 
   const url = `http://${localIp}:${port}`;
 
-  console.log(`Server v1.2.0 running at ${url}`);
+  console.log(`Server v1.5.0 running at ${url}`);
   // Generate QR Code in terminal
   QRCode.toString(
     url,
