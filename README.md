@@ -1,0 +1,176 @@
+QrSHARE — MVP
+=================
+
+A lightweight local file transfer tool that lets you send files from your
+phone to your computer using a QR code and Wi-Fi.
+
+No cloud.
+No compression.
+No accounts.
+Just scan, upload, done.
+
+--------------------------------------------------
+OVERVIEW
+--------------------------------------------------
+QrSHARE turns your computer into a temporary local server.
+When you scan the QR code shown on your computer, an upload page opens
+on your phone browser. Any files uploaded are saved directly to a folder
+on your computer (e.g. Downloads/PhoneDrop).
+
+Both devices must be on the same Wi-Fi network.
+
+--------------------------------------------------
+TECH STACK
+--------------------------------------------------
+- Node.js (runtime)
+- Express.js (HTTP server)
+- Multer (file uploads)
+- QRCode (QR generation)
+- PM2 (optional: background process manager)
+
+Frontend:
+- Plain HTML (mobile-friendly)
+- No framework (MVP simplicity)
+
+--------------------------------------------------
+PROJECT STRUCTURE
+--------------------------------------------------
+qrshare/
+│
+├── server.js          # Main server logic
+├── README.txt         # Project documentation
+│
+├── public/
+│   └── index.html     # Mobile upload page
+│
+└── uploads/           # (Optional) Default upload directory
+                        # Actual files are saved to:
+                        # ~/Downloads/PhoneDrop
+
+--------------------------------------------------
+HOW IT WORKS
+--------------------------------------------------
+1. The Node.js server starts on your computer.
+2. The server detects your local IP address.
+3. A QR code is generated containing the local server URL.
+4. You scan the QR code with your phone.
+5. The upload page opens in the phone browser.
+6. Selected files are uploaded over Wi-Fi.
+7. Files are saved directly to your computer.
+
+--------------------------------------------------
+INSTALLATION
+--------------------------------------------------
+Requirements:
+- Node.js v18+
+
+Steps:
+1. Clone or download the project
+2. Open terminal in the project folder
+3. Install dependencies:
+
+   npm install
+
+--------------------------------------------------
+RUNNING THE APP
+--------------------------------------------------
+Start the server:
+
+   node server.js
+
+You will see:
+- The local server URL
+- A QR code in the terminal
+
+Scan the QR code using your phone camera.
+
+--------------------------------------------------
+DEFAULT SAVE LOCATION
+--------------------------------------------------
+Files are saved directly to your computer here:
+
+   ~/Downloads/PhoneDrop
+
+The folder is created automatically if it does not exist.
+
+--------------------------------------------------
+OPTIONAL: RUN IN BACKGROUND (RECOMMENDED)
+--------------------------------------------------
+To keep the server running without an open terminal:
+
+1. Install PM2 globally:
+
+   npm install -g pm2
+
+2. Start the app:
+
+   pm2 start server.js --name phone-drop
+
+3. Save process:
+
+   pm2 save
+
+4. Enable auto-start on boot:
+
+   pm2 startup
+
+--------------------------------------------------
+SECURITY NOTES
+--------------------------------------------------
+This app is intended for personal use on a trusted local network.
+
+Security assumptions:
+- Same Wi-Fi network
+- Temporary usage
+- No public exposure
+
+For extra safety:
+- Add a PIN check
+- Stop the server when not in use
+
+--------------------------------------------------
+LIMITATIONS
+--------------------------------------------------
+- Computer must be powered on
+- Both devices must be on the same network
+- No encryption (local network only)
+- No authentication (MVP)
+
+--------------------------------------------------
+FUTURE IMPROVEMENTS
+--------------------------------------------------
+- Drag & drop upload UI
+- Upload progress indicator
+- File type grouping
+- Password / PIN protection
+- PC → Phone file transfer
+- Desktop tray app
+- One-click installer
+
+--------------------------------------------------
+USE CASES
+--------------------------------------------------
+- Send screenshots from phone to PC
+- Transfer documents without WhatsApp
+- Move videos without compression
+- Quick local file sharing
+
+--------------------------------------------------
+LICENSE
+--------------------------------------------------
+Personal / Internal use.
+
+--------------------------------------------------
+VERSION HISTORY
+--------------------------------------------------
+v1.0.0 (MVP) - 2026-02-16
+- Initial release
+- Basic file upload functionality
+- QR code generation
+- Local IP detection
+
+v1.1.0 (UI Overhaul) - 2026-02-16
+- Premium Dark Mode UI
+- Separated HTML/CSS/JS
+- Improved File List & Drag/Drop
+- Fixed server shutdown issue
