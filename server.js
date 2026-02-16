@@ -49,11 +49,15 @@ app.listen(port, () => {
 
   console.log(`Server running at ${url}`);
   // Generate QR Code in terminal
-  QRCode.toString(url, { type: "terminal" }, function (err, qrOutput) {
-    if (err) console.log(err);
-    console.log(qrOutput);
-    console.log("\nPress Ctrl+C to stop the server.");
-  });
+  QRCode.toString(
+    url,
+    { type: "terminal", small: true },
+    function (err, qrOutput) {
+      if (err) console.log(err);
+      console.log(qrOutput);
+      console.log("\nPress Ctrl+C to stop the server.");
+    },
+  );
 });
 
 // Error handling to prevent crash
