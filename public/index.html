@@ -18,42 +18,74 @@
     </header>
 
     <main class="main-content">
-      <div class="hero-icon">
-        <i class="fas fa-qrcode"></i>
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="send">Send Files</button>
+        <button class="tab-btn" data-tab="receive">Receive Files</button>
       </div>
-      <h1>QR File Drop</h1>
-      <p class="subtitle">Upload files directly to local machine</p>
 
-      <div class="drop-zone" id="dropZone">
-        <input type="file" id="fileInput" multiple />
-        <div class="drop-zone-content">
-          <i class="fas fa-cloud-upload-alt cloud-icon"></i>
-          <div class="drop-zone-text">Tap or Drag files</div>
-          <div class="drop-zone-subtext">Supports multiple file selection</div>
+      <div id="send-tab" class="tab-content active">
+        <div class="hero-icon">
+          <i class="fas fa-qrcode"></i>
+        </div>
+        <h1>QR File Drop</h1>
+        <p class="subtitle">Upload files directly to local machine</p>
+
+        <div class="drop-zone" id="dropZone">
+          <input type="file" id="fileInput" multiple />
+          <div class="drop-zone-content">
+            <i class="fas fa-cloud-upload-alt cloud-icon"></i>
+            <div class="drop-zone-text">Tap or Drag files</div>
+            <div class="drop-zone-subtext">
+              Supports multiple file selection
+            </div>
+          </div>
+        </div>
+
+        <div class="file-list-header">
+          <span>Ready to Upload</span>
+          <span id="fileCount">0 files</span>
+        </div>
+
+        <div class="file-list" id="fileList">
+          <!-- File items will be injected here -->
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-secondary" id="browseBtn">
+            <i class="fas fa-folder-open"></i> Browse Files
+          </button>
+          <button
+            class="btn btn-primary"
+            id="uploadBtn"
+            disabled
+            style="opacity: 0.5"
+          >
+            Start Upload &uarr;
+          </button>
         </div>
       </div>
 
-      <div class="file-list-header">
-        <span>Ready to Upload</span>
-        <span id="fileCount">0 files</span>
-      </div>
+      <div id="receive-tab" class="tab-content">
+        <div class="hero-icon">
+          <i class="fas fa-download"></i>
+        </div>
+        <h1>PC Files</h1>
+        <p class="subtitle">Download files from your computer</p>
 
-      <div class="file-list" id="fileList">
-        <!-- File items will be injected here -->
-      </div>
-
-      <div class="actions">
-        <button class="btn btn-secondary" id="browseBtn">
-          <i class="fas fa-folder-open"></i> Browse Files
-        </button>
         <button
-          class="btn btn-primary"
-          id="uploadBtn"
-          disabled
-          style="opacity: 0.5"
+          class="btn btn-secondary"
+          id="refreshBtn"
+          style="margin-bottom: 20px"
         >
-          Start Upload &uarr;
+          <i class="fas fa-sync-alt"></i> Refresh List
         </button>
+
+        <div class="file-list" id="downloadList">
+          <!-- Download items will be injected here -->
+          <div style="text-align: center; color: #888; padding: 20px">
+            Loading files...
+          </div>
+        </div>
       </div>
 
       <div class="session-id">

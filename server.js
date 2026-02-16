@@ -33,6 +33,8 @@ const upload = multer({ storage: storage });
 
 // Serve static files from 'public' directory
 app.use(express.static("public"));
+// Serve uploaded files for download
+app.use("/downloads", express.static(uploadDir));
 
 // File upload endpoint
 app.post("/upload", upload.array("files"), (req, res) => {
@@ -40,6 +42,35 @@ app.post("/upload", upload.array("files"), (req, res) => {
     return res.status(400).send("No files uploaded.");
   }
   res.send("Files uploaded successfully to " + uploadDir);
+});
+
+// List files endpoint
+app.get("/files", (req, res) => {
+  fs.readdir(uploadDir, (err, files) => {
+    if (err) {
+      return res.status(500).json({ error: "Unable to scan directory" });
+    }
+
+    const fileInfos = files
+      .map((file) => {
+        const filePath = path.join(uploadDir, file);
+        try {
+          const stats = fs.statSync(filePath);
+          if (stats.isFile()) {
+            return {
+              name: file,
+              size: stats.size,
+              url: `/downloads/${encodeURIComponent(file)}`,
+            };
+          }
+        } catch (e) {
+          return null;
+        }
+      })
+      .filter((item) => item !== null);
+
+    res.json(fileInfos);
+  });
 });
 
 // Start server

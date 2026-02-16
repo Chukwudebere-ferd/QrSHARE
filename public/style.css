@@ -73,6 +73,43 @@ body {
   flex-direction: column;
 }
 
+/* Tabs */
+.tabs {
+  display: flex;
+  background-color: var(--card-bg);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 30px;
+}
+
+.tab-btn {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 10px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.tab-btn.active {
+  background-color: var(--bg-color); /* Creating a contrast */
+  color: var(--text-primary);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.tab-content {
+  display: none;
+  flex-direction: column;
+  width: 100%;
+}
+
+.tab-content.active {
+  display: flex;
+}
+
 .hero-icon {
   font-size: 48px;
   margin-bottom: 20px;
@@ -183,6 +220,8 @@ p.subtitle {
   align-items: center;
   justify-content: space-between;
   animation: fadeIn 0.3s ease;
+  text-decoration: none; /* For download links */
+  color: var(--text-primary);
 }
 
 @keyframes fadeIn {
@@ -201,6 +240,7 @@ p.subtitle {
   align-items: center;
   gap: 15px;
   overflow: hidden;
+  flex: 1;
 }
 
 .file-icon {
@@ -236,17 +276,27 @@ p.subtitle {
   margin-top: 2px;
 }
 
-.remove-btn {
+.remove-btn,
+.download-btn {
   background: none;
   border: none;
   color: var(--text-secondary);
   cursor: pointer;
   padding: 5px;
   transition: color 0.2s;
+  font-size: 18px;
 }
 
 .remove-btn:hover {
   color: var(--danger-color);
+}
+
+.download-btn {
+  color: var(--accent-color);
+}
+
+.download-btn:hover {
+  color: var(--accent-hover);
 }
 
 .actions {
@@ -256,7 +306,7 @@ p.subtitle {
   gap: 12px;
   position: sticky;
   bottom: 0;
-  background-color: var(--bg-color); /* Cover content behind */
+  background-color: var(--bg-color);
   padding-top: 10px;
 }
 

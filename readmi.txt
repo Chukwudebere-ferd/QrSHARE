@@ -174,3 +174,8 @@ v1.1.0 (UI Overhaul) - 2026-02-16
 - Separated HTML/CSS/JS
 - Improved File List & Drag/Drop
 - Fixed server shutdown issue
+
+v1.2.0 (Two-Way Sync) - 2026-02-16
+- PC to Phone file transfer
+- Download tab in UI
+- File listing API `GET /files`
