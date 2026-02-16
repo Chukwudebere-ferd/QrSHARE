@@ -179,3 +179,8 @@ v1.2.0 (Two-Way Sync) - 2026-02-16
 - PC to Phone file transfer
 - Download tab in UI
 - File listing API `GET /files`
+
+v1.3.0 (Remote File Browsing) - 2026-02-16
+- Full directory navigation from phone
+- Browse any folder on PC
+- Download arbitrary files

@@ -172,50 +172,114 @@ uploadBtn.addEventListener("click", async () => {
 });
 
 // Downloads Logic
-refreshBtn.addEventListener("click", fetchFiles);
+refreshBtn.addEventListener("click", () => fetchFiles());
 
-async function fetchFiles() {
+let currentPath = "";
+
+async function fetchFiles(path = "") {
   downloadList.innerHTML =
     '<div style="text-align: center; color: #888; padding: 20px;"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
 
   try {
-    const response = await fetch("/files");
-    const files = await response.json();
+    const url = path ? `/files?path=${encodeURIComponent(path)}` : "/files";
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(
+        `Server returned ${response.status} ${response.statusText}`,
+      );
+    }
+    const data = await response.json();
+    currentPath = data.path;
 
+    const files = data.entries;
     downloadList.innerHTML = "";
 
+    // Add "Up" button if not at start (or simple check if path is not empty/root)
+    // For simplicity, just show it if we have a current path that looks like we moved
+    if (path && path.length > 0) {
+      const upItem = document.createElement("div");
+      upItem.className = "file-item";
+      upItem.style.cursor = "pointer";
+      upItem.onclick = () => {
+        // Simple parent dir logic or just go back to home if complex
+        // Using '..' logic relative to current path might be tricky without path module on frontend
+        // But backend handles 'path' param.
+        // Let's implement a simple "Back" that effectively goes to parent.
+        // Actually, we can just ask backend for parent? Or split string.
+        const separator = currentPath.includes("/") ? "/" : "\\";
+        const parts = currentPath.split(separator);
+        parts.pop();
+        const parentPath = parts.join(separator);
+        fetchFiles(parentPath);
+      };
+
+      upItem.innerHTML = `
+                <div class="file-info">
+                    <div class="file-icon" style="background-color: #333;">
+                        <i class="fas fa-arrow-up"></i>
+                    </div>
+                    <div class="file-details">
+                        <span class="file-name">.. (Up)</span>
+                        <span class="file-size">Parent Directory</span>
+                    </div>
+                </div>
+            `;
+      downloadList.appendChild(upItem);
+    }
+
     if (files.length === 0) {
-      downloadList.innerHTML =
-        '<div style="text-align: center; color: #888; padding: 20px;">No files found on server.</div>';
+      downloadList.innerHTML +=
+        '<div style="text-align: center; color: #888; padding: 20px;">Empty directory.</div>';
       return;
     }
 
     files.forEach((file) => {
-      const item = document.createElement("a");
+      const item = document.createElement(
+        file.type === "directory" ? "div" : "a",
+      );
       item.className = "file-item";
-      item.href = file.url;
-      item.download = file.name; // Force download
-      item.target = "_blank";
+
+      if (file.type === "directory") {
+        item.style.cursor = "pointer";
+        item.onclick = () => fetchFiles(file.path);
+      } else {
+        item.href = `/download?path=${encodeURIComponent(file.path)}`;
+        item.download = file.name;
+        item.target = "_blank";
+      }
+
+      const iconClass =
+        file.type === "directory" ? "fa-folder" : getIconClass(file.name);
+      const iconColor = file.type === "directory" ? "#007AFF" : "#aaa";
+      const iconBg =
+        file.type === "directory" ? "rgba(0, 122, 255, 0.1)" : "#222";
 
       item.innerHTML = `
                 <div class="file-info">
-                    <div class="file-icon">
-                        <i class="fas ${getIconClass(file.name)}"></i>
+                    <div class="file-icon" style="background-color: ${iconBg}; color: ${iconColor};">
+                        <i class="fas ${iconClass}"></i>
                     </div>
                     <div class="file-details">
                         <span class="file-name">${file.name}</span>
-                        <span class="file-size">${formatSize(file.size)}</span>
+                        <span class="file-size">${file.type === "directory" ? "Folder" : "File"}</span>
                     </div>
                 </div>
+                ${
+                  file.type !== "directory"
+                    ? `
                 <div class="download-btn">
                     <i class="fas fa-download"></i>
-                </div>
+                </div>`
+                    : `
+                <div class="download-btn" style="color: #666;">
+                    <i class="fas fa-chevron-right"></i>
+                </div>`
+                }
             `;
       downloadList.appendChild(item);
     });
   } catch (error) {
     console.error(error);
-    downloadList.innerHTML =
-      '<div style="text-align: center; color: #ff3b30; padding: 20px;">Failed to load files.</div>';
+    downloadList.innerHTML = `<div style="text-align: center; color: #ff3b30; padding: 20px;">Failed to load files.<br><small>${error.message}</small><br><br><button class="btn btn-secondary" onclick="fetchFiles()">Retry Home</button></div>`;
   }
 }

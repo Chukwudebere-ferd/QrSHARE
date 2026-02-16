@@ -9,6 +9,12 @@ const os = require("os");
 const app = express();
 const port = 3000;
 
+// Simple in-memory storage for shared text
+let sharedText = "";
+
+// Support JSON bodies for text sharing
+app.use(express.json());
+
 // Configure upload directory
 const uploadDir = path.join(os.homedir(), "Downloads", "PhoneDrop");
 
@@ -44,33 +50,76 @@ app.post("/upload", upload.array("files"), (req, res) => {
   res.send("Files uploaded successfully to " + uploadDir);
 });
 
-// List files endpoint
+// List files endpoint (with directory navigation)
 app.get("/files", (req, res) => {
-  fs.readdir(uploadDir, (err, files) => {
+  const currentPath = req.query.path || os.homedir();
+
+  fs.readdir(currentPath, { withFileTypes: true }, (err, entries) => {
     if (err) {
-      return res.status(500).json({ error: "Unable to scan directory" });
+      return res
+        .status(500)
+        .json({ error: `Unable to scan directory: ${err.message}` });
     }
 
-    const fileInfos = files
-      .map((file) => {
-        const filePath = path.join(uploadDir, file);
-        try {
-          const stats = fs.statSync(filePath);
-          if (stats.isFile()) {
-            return {
-              name: file,
-              size: stats.size,
-              url: `/downloads/${encodeURIComponent(file)}`,
-            };
-          }
-        } catch (e) {
-          return null;
-        }
+    const fileInfos = entries
+      .map((entry) => {
+        // Skip hidden files/folders
+        if (entry.name.startsWith(".")) return null;
+
+        return {
+          name: entry.name,
+          type: entry.isDirectory() ? "directory" : "file",
+          path: path.join(currentPath, entry.name),
+        };
       })
       .filter((item) => item !== null);
 
-    res.json(fileInfos);
+    // Sort: folders first, then files
+    fileInfos.sort((a, b) => {
+      if (a.type === b.type) return a.name.localeCompare(b.name);
+      return a.type === "directory" ? -1 : 1;
+    });
+
+    res.json({ path: currentPath, entries: fileInfos });
   });
+});
+
+// Download arbitrary file endpoint
+app.get("/download", (req, res) => {
+  const filePath = req.query.path;
+  if (!filePath) {
+    return res.status(400).send("No path provided.");
+  }
+  res.download(filePath, (err) => {
+    if (err) {
+      // Handle error, but don't expose too much specific info if sensitive
+      // For local tool, log it.
+      console.error("Download error:", err);
+      if (!res.headersSent) {
+        res.status(500).send("Could not download file.");
+      }
+    }
+  });
+});
+
+    });
+});
+
+// Get shared text endpoint
+app.get("/text", (req, res) => {
+  res.json({ text: sharedText });
+});
+
+// Update shared text endpoint
+app.post("/text", (req, res) => {
+  const { text } = req.body;
+  if (typeof text === "string") {
+    sharedText = text;
+    console.log("Updated shared text:", sharedText.substring(0, 50) + (sharedText.length > 50 ? "..." : ""));
+    res.json({ success: true, text: sharedText });
+  } else {
+    res.status(400).json({ error: "Invalid text provided." });
+  }
 });
 
 // Start server
@@ -114,7 +163,7 @@ app.listen(port, () => {
 
   const url = `http://${localIp}:${port}`;
 
-  console.log(`Server running at ${url}`);
+  console.log(`Server v1.2.0 running at ${url}`);
   // Generate QR Code in terminal
   QRCode.toString(
     url,
