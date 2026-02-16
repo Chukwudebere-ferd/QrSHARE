@@ -1,4 +1,4 @@
-QR FILE DROP — MVP
+QrSHARE — MVP
 =================
 
 A lightweight local file transfer tool that lets you send files from your
@@ -12,7 +12,7 @@ Just scan, upload, done.
 --------------------------------------------------
 OVERVIEW
 --------------------------------------------------
-QR File Drop turns your computer into a temporary local server.
+QrSHARE turns your computer into a temporary local server.
 When you scan the QR code shown on your computer, an upload page opens
 on your phone browser. Any files uploaded are saved directly to a folder
 on your computer (e.g. Downloads/PhoneDrop).
@@ -35,7 +35,7 @@ Frontend:
 --------------------------------------------------
 PROJECT STRUCTURE
 --------------------------------------------------
-qr-file-drop/
+qrshare/
 │
 ├── server.js          # Main server logic
 ├── README.txt         # Project documentation
