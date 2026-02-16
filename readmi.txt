@@ -159,3 +159,12 @@ USE CASES
 LICENSE
 --------------------------------------------------
 Personal / Internal use.
+
+--------------------------------------------------
+VERSION HISTORY
+--------------------------------------------------
+v1.0.0 (MVP) - 2026-02-16
+- Initial release
+- Basic file upload functionality
+- QR code generation
+- Local IP detection
