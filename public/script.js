@@ -189,6 +189,81 @@ uploadBtn.addEventListener("click", async () => {
 refreshBtn.addEventListener("click", () => fetchFiles());
 
 let currentPath = "";
+let previewableImages = []; // Store previewable images
+let currentPreviewIndex = -1; // Current image in preview
+const imagePreviewModal = document.getElementById("imagePreviewModal");
+const previewImage = document.getElementById("previewImage");
+const previewFilename = document.getElementById("previewFilename");
+const previewDownloadBtn = document.getElementById("previewDownloadBtn");
+const closePreviewBtn = document.querySelector(".close-preview-btn");
+const prevNavBtn = document.querySelector(".prev-nav");
+const nextNavBtn = document.querySelector(".next-nav");
+
+// Image Preview Functions
+function openImagePreview(imagePath, filename, imageIndex) {
+  currentPreviewIndex = imageIndex;
+  previewImage.src = `/download?path=${encodeURIComponent(imagePath)}`;
+  previewFilename.textContent = filename;
+  previewDownloadBtn.href = `/download?path=${encodeURIComponent(imagePath)}`;
+  previewDownloadBtn.download = filename;
+  imagePreviewModal.classList.add("active");
+  updatePreviewNavigation();
+}
+
+function closeImagePreview() {
+  imagePreviewModal.classList.remove("active");
+  currentPreviewIndex = -1;
+}
+
+function updatePreviewNavigation() {
+  // Enable/disable prev button
+  if (currentPreviewIndex <= 0) {
+    prevNavBtn.classList.add("disabled");
+  } else {
+    prevNavBtn.classList.remove("disabled");
+  }
+
+  // Enable/disable next button
+  if (currentPreviewIndex >= previewableImages.length - 1) {
+    nextNavBtn.classList.add("disabled");
+  } else {
+    nextNavBtn.classList.remove("disabled");
+  }
+}
+
+function showPrevImage() {
+  if (currentPreviewIndex > 0) {
+    const prevImg = previewableImages[currentPreviewIndex - 1];
+    openImagePreview(prevImg.path, prevImg.name, currentPreviewIndex - 1);
+  }
+}
+
+function showNextImage() {
+  if (currentPreviewIndex < previewableImages.length - 1) {
+    const nextImg = previewableImages[currentPreviewIndex + 1];
+    openImagePreview(nextImg.path, nextImg.name, currentPreviewIndex + 1);
+  }
+}
+
+// Event Listeners for Preview Modal
+closePreviewBtn.addEventListener("click", closeImagePreview);
+prevNavBtn.addEventListener("click", showPrevImage);
+nextNavBtn.addEventListener("click", showNextImage);
+
+// Close modal when clicking outside the image
+imagePreviewModal.addEventListener("click", (e) => {
+  if (e.target === imagePreviewModal) {
+    closeImagePreview();
+  }
+});
+
+// Keyboard navigation for preview
+document.addEventListener("keydown", (e) => {
+  if (!imagePreviewModal.classList.contains("active")) return;
+  if (e.key === "Escape") closeImagePreview();
+  if (e.key === "ArrowLeft") showPrevImage();
+  if (e.key === "ArrowRight") showNextImage();
+});
 
 async function fetchFiles(path = "") {
   downloadList.innerHTML =
@@ -207,6 +282,7 @@ async function fetchFiles(path = "") {
 
     const files = data.entries;
     downloadList.innerHTML = "";
+    previewableImages = []; // Reset previewable images array
 
     // Add "Up" button if we have a parent path and it's different from current
     if (data.parentPath && data.parentPath !== currentPath) {
@@ -258,7 +334,13 @@ async function fetchFiles(path = "") {
       if (!isDir && file.isPreviewable) {
         const previewUrl = `/download?path=${encodeURIComponent(file.path)}`;
         if (file.mediaType === "image") {
-          iconHtml = `<img src="${previewUrl}" class="file-preview" alt="preview">`;
+          // Track this image for preview navigation
+          previewableImages.push({
+            path: file.path,
+            name: file.name,
+          });
+          const imageIndex = previewableImages.length - 1;
+          iconHtml = `<img src="${previewUrl}" class="file-preview" alt="preview" style="cursor: pointer;">`;
         } else if (file.mediaType === "video") {
           // Showing a video purely as a thumbnail might be hard without generating thumbs,
           // but we can try small video tag or just stick to icon + special style.
@@ -281,6 +363,19 @@ async function fetchFiles(path = "") {
                     <i class="fas ${isDir ? "fa-chevron-right" : "fa-download"}"></i>
                 </div>
             `;
+
+      // Add click handler for image preview
+      if (!isDir && file.isPreviewable && file.mediaType === "image") {
+        const imageIndex = previewableImages.length - 1;
+        const previewImg = item.querySelector(".file-preview");
+        if (previewImg) {
+          previewImg.addEventListener("click", (e) => {
+            e.stopPropagation();
+            openImagePreview(file.path, file.name, imageIndex);
+          });
+        }
+      }
+
       downloadList.appendChild(item);
     });
   } catch (error) {

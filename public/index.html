@@ -143,6 +143,30 @@
       </div>
     </main>
 
+    <!-- Image Preview Modal -->
+    <div id="imagePreviewModal" class="image-preview-modal">
+      <div class="preview-container">
+        <button class="close-preview-btn" title="Close">
+          <i class="fas fa-times"></i>
+        </button>
+        <div class="preview-nav prev-nav" title="Previous">
+          <i class="fas fa-chevron-left"></i>
+        </div>
+        <div class="preview-content">
+          <img id="previewImage" src="" alt="preview" />
+        </div>
+        <div class="preview-nav next-nav" title="Next">
+          <i class="fas fa-chevron-right"></i>
+        </div>
+        <div class="preview-info">
+          <div class="preview-filename" id="previewFilename"></div>
+          <a id="previewDownloadBtn" class="btn btn-primary" style="gap: 8px;">
+            <i class="fas fa-download"></i> Download
+          </a>
+        </div>
+      </div>
+    </div>
+
     <script src="script.js"></script>
   </body>
 </html>
